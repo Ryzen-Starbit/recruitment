@@ -1,0 +1,293 @@
+function checkAsset(path, flagClass){
+return new Promise(resolve => {
+const img = new Image();
+img.onload = () => { document.body.classList.add(flagClass); resolve(true); };
+img.onerror = () => resolve(false);
+img.src = path;
+});
+}
+function playSound(path){ const a = new Audio(path); a.play().catch(() => {}); }
+function initStarfield(){
+const canvas = document.getElementById('starfield');
+if (!canvas) return;
+const ctx = canvas.getContext('2d');
+function resize(){ canvas.width = innerWidth; canvas.height = innerHeight; }
+resize(); addEventListener('resize', resize);
+const stars = Array.from({ length: 55 }, () => ({
+x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+r: Math.random() * 1.3 + 0.3, phase: Math.random() * Math.PI * 2, speed: 0.4 + Math.random() * 0.8
+}));
+function tick(t){
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+stars.forEach(s => {
+const tw = 0.5 + 0.5 * Math.sin((t / 1000) * s.speed + s.phase);
+ctx.globalAlpha = 0.2 + tw * 0.7; ctx.fillStyle = '#f5efe3';
+ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
+});
+ctx.globalAlpha = 1; requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+}
+const domainIcons = {
+Art: `<path d="M10 44l6-30h4l4 26h16l4-26h4l6 30h-6l-2-8H18l-2 8z"/>`,
+Photography: `<path d="M6 16h10l4-6h16l4 6h12a4 4 0 014 4v20a4 4 0 01-4 4H6a4 4 0 01-4-4V20a4 4 0 014-4z"/><circle cx="34" cy="30" r="9" fill="#07050f"/>`,
+Video_Editing: `<path d="M4 18h44a4 4 0 014 4v20a4 4 0 01-4 4H4a4 4 0 01-4-4V22a4 4 0 014-4z"/><path d="M8 18l6-14h7l-6 14M24 18l6-14h7l-6 14M40 18l6-14h6l-6 14" fill="none" stroke="#07050f" stroke-width="3"/>`,
+Digital_Art: `<rect x="6" y="4" width="40" height="52" rx="5"/><path d="M38 0l10 10-7 7-10-10z" fill="#07050f"/>`,
+Other: `<path d="M24 2l4.5 17.5L46 24l-17.5 4.5L24 46l-4.5-17.5L2 24l17.5-4.5z"/>`
+};
+const domainColorVar = {
+Art:'var(--c-art)', Photography:'var(--c-photo)', Video_Editing:'var(--c-video)',
+Digital_Art:'var(--c-digital)', Other:'var(--c-other)'
+};
+const domainElementSrc = {
+Art:'assets/art.png', Photography:'assets/photography.png',
+Video_Editing:'assets/video-editing.png', Digital_Art:'assets/digital-art.png'
+};
+const domainMedia = {
+Art:['assets/a1.webp','assets/a2.webp','assets/a3.webp','assets/a4.webp','assets/a5.webp'],
+Photography:['assets/p1.webp','assets/p2.webp','assets/p3.webp','assets/p4.webp','assets/p5.webp'],
+Video_Editing:[],
+Digital_Art:['assets/da1.webp','assets/da2.webp','assets/da3.webp','assets/da4.webp','assets/da5.webp'],
+Other:[]
+};
+function mediaEl(domain, src){
+if (src){
+if (/\.(mp4|webm)$/i.test(src)) return `<video src="${src}" autoplay muted loop playsinline></video>`;
+return `<img src="${src}" alt="">`;
+}
+return `<svg viewBox="0 0 48 48" style="fill:#07050f">${domainIcons[domain]}</svg>`;
+}
+function svgIcon(domain, color){
+const wrap = document.createElement('div');
+wrap.style.cssText = 'width:100%;height:100%';
+wrap.innerHTML = `<svg viewBox="0 0 48 48" style="fill:${color};width:100%;height:100%">${domainIcons[domain]}</svg>`;
+return wrap.firstElementChild;
+}
+function makeFloaterIcon(key){
+const img = document.createElement('img');
+img.src = domainElementSrc[key];
+img.style.cssText = 'width:100%;height:100%;object-fit:contain;filter:brightness(0) invert(1)';
+img.onerror = () => img.replaceWith(svgIcon(key, 'var(--paper)'));
+return img;
+}
+function spawnFloaters(count){
+const layer = document.getElementById('bgFloaters');
+if (!layer) return;
+const keys = Object.keys(domainElementSrc);
+for (let i = 0; i < count; i++){
+const key = keys[i % keys.length];
+const el = document.createElement('div');
+el.className = 'floater';
+el.style.left = Math.random() * 100 + '%';
+el.style.top = Math.random() * 100 + '%';
+el.style.width = (40 + Math.random() * 46) + 'px';
+el.style.animationDuration = (12 + Math.random() * 14) + 's';
+el.style.animationDelay = (Math.random() * 10) + 's';
+el.appendChild(makeFloaterIcon(key));
+layer.appendChild(el);
+}
+}
+function spawnHeroHang(){
+const layer = document.getElementById('heroHang');
+if (!layer) return;
+const keys = ['Art','Photography','Video_Editing','Digital_Art'];
+keys.forEach((key, i) => {
+const left = 10 + i * 26, h = 50 + (i % 2) * 50;
+const src = domainMedia[key] && domainMedia[key][0] ? domainMedia[key][0] : null;
+const el = document.createElement('div');
+el.className = 'hang'; el.style.left = left + '%';
+el.innerHTML = `<span class="thread" style="height:${h}px;"></span><span class="swatch" style="background:${domainColorVar[key]}">${mediaEl(key, src)}</span>`;
+layer.appendChild(el);
+});
+}
+function spawnSplashBlobs(){
+const layer = document.getElementById('splashLayer');
+if (!layer) return;
+const colors = ['var(--red)','var(--gold)','var(--teal)','var(--blue)','var(--orange)','var(--purple)','var(--paper)'];
+const cols = 4, rows = 4;
+const big = Math.max(window.innerWidth, window.innerHeight);
+let i = 0;
+for (let r = 0; r < rows; r++){
+for (let c = 0; c < cols; c++){
+const el = document.createElement('span');
+el.className = 'splat';
+const w = big * (0.42 + Math.random() * 0.3);
+const h = w * (0.75 + Math.random() * 0.5);
+el.style.width = w + 'px';
+el.style.height = h + 'px';
+const left = (c / (cols - 1)) * 130 - 20 + (Math.random() * 18 - 9);
+const top = (r / (rows - 1)) * 130 - 20 + (Math.random() * 18 - 9);
+el.style.left = left + 'vw';
+el.style.top = top + 'vh';
+el.style.background = colors[i % colors.length];
+el.style.animationDelay = (Math.random() * 0.35) + 's';
+layer.appendChild(el);
+i++;
+}
+}
+}
+initStarfield();
+spawnFloaters(14);
+spawnHeroHang();
+document.addEventListener('click', e => {
+const sw = e.target.closest('.swatch');
+if (!sw) return;
+document.querySelectorAll('.swatch.enlarged').forEach(s => { if (s !== sw) s.classList.remove('enlarged'); });
+sw.classList.toggle('enlarged');
+});
+Promise.all([
+checkAsset('assets/brush.png', 'has-brush-asset'),
+checkAsset('assets/camera.png', 'has-camera-asset')
+]).then(() => {
+const loaderEl = document.getElementById('loader');
+function stage(name, delay){ setTimeout(() => { if (loaderEl) loaderEl.classList.add('stage-' + name); }, delay); }
+function unstage(name, delay){ setTimeout(() => { if (loaderEl) loaderEl.classList.remove('stage-' + name); }, delay); }
+stage('brush', 100);
+setTimeout(spawnSplashBlobs, 450);
+playSound('assets/splash.mp3');
+stage('emblem', 1400);
+unstage('emblem', 2700);
+stage('camera', 3000);
+setTimeout(() => playSound('assets/click.mp3'), 3320);
+unstage('camera', 4050);
+stage('flash', 4000);
+setTimeout(() => {
+if (loaderEl) loaderEl.classList.add('loader-done');
+setTimeout(() => {
+const applyEl = document.getElementById('apply');
+if (applyEl) applyEl.scrollIntoView({ behavior: 'smooth' });
+}, 10000);
+}, 4500);
+});
+const steps = [...document.querySelectorAll('.step')];
+const stops = [...document.querySelectorAll('.stop')];
+const railFill = document.getElementById('railFill');
+const avatarToken = document.getElementById('avatarToken');
+const avatarSvg = document.getElementById('avatarSvg');
+const curtain = document.getElementById('curtain');
+let currentStep = 1;
+let state = { gender: null, domains: [] };
+function goToStep(n){
+steps.forEach(s => s.classList.toggle('active', +s.dataset.step === n));
+stops.forEach(s => s.classList.toggle('active', +s.dataset.step <= n));
+currentStep = n;
+if (railFill && avatarToken && steps.length > 1){
+const pct = ((n - 1) / (steps.length - 1)) * 100;
+railFill.style.width = pct + '%';
+avatarToken.style.left = `calc(${pct}% - 22px)`;
+}
+}
+function playCurtain(onMid){
+if (!curtain) { onMid(); return; }
+curtain.classList.add('active');
+setTimeout(onMid, 430);
+setTimeout(() => curtain.classList.remove('active'), 480);
+}
+document.querySelectorAll('[data-next]').forEach(btn => {
+btn.addEventListener('click', () => {
+if (currentStep === 1){
+playCurtain(() => {
+goToStep(2);
+renderSkillsSummary();
+spawnFormHang();
+});
+return;
+}
+if (currentStep < steps.length) goToStep(currentStep + 1);
+});
+});
+document.querySelectorAll('[data-back]').forEach(btn => {
+btn.addEventListener('click', () => { if (currentStep > 1) goToStep(currentStep - 1); });
+});
+const genderChipsEl = document.getElementById('genderChips');
+if (genderChipsEl) genderChipsEl.addEventListener('click', e => {
+const chip = e.target.closest('.chip'); if (!chip) return;
+[...chip.parentElement.children].forEach(c => c.classList.remove('selected'));
+chip.classList.add('selected');
+state.gender = chip.dataset.value;
+renderAvatar(); checkStep1();
+});
+function popDomainIcon(chip, key){
+if (!domainElementSrc[key]) return;
+const pop = document.createElement('img');
+pop.src = domainElementSrc[key];
+pop.className = 'chip-pop';
+pop.onerror = () => pop.remove();
+chip.appendChild(pop);
+setTimeout(() => pop.remove(), 950);
+}
+const domainChipsEl = document.getElementById('domainChips');
+if (domainChipsEl) domainChipsEl.addEventListener('click', e => {
+const chip = e.target.closest('.chip'); if (!chip) return;
+chip.classList.toggle('selected');
+const val = chip.dataset.value;
+if (chip.classList.contains('selected')){
+state.domains.push(val);
+popDomainIcon(chip, val);
+} else {
+state.domains = state.domains.filter(d => d !== val);
+}
+renderAvatar(); checkStep1();
+});
+function checkStep1(){
+const btn = document.querySelector('[data-step="1"] .btn-next');
+const nameEl = document.getElementById('fName');
+if (btn) btn.disabled = !(state.gender && state.domains.length > 0 && nameEl && nameEl.value.trim());
+}
+const fNameEl = document.getElementById('fName');
+if (fNameEl) fNameEl.addEventListener('input', checkStep1);
+function renderSkillsSummary(){
+const wrap = document.getElementById('skillsSummary');
+if (!wrap) return;
+wrap.innerHTML = state.domains.map(d =>
+`<span class="chip domain-chip selected readonly" style="--dc:${domainColorVar[d]}">${d.replace('_',' ')}</span>`
+).join('');
+}
+function renderAvatar(){
+if (!state.domains.length || !avatarSvg) return;
+const primary = state.domains[state.domains.length - 1];
+const accent = domainColorVar[primary];
+let hair = '';
+if (state.gender === 'Girl') hair = `<path d="M14 20 Q30 4 46 20 L46 34 Q30 24 14 34 Z" fill="${accent}" opacity=".9"/>`;
+else if (state.gender === 'Boy') hair = `<path d="M14 20 Q30 10 46 20 L46 24 Q30 16 14 24 Z" fill="${accent}" opacity=".9"/>`;
+else hair = `<circle cx="30" cy="18" r="10" fill="none" stroke="${accent}" stroke-width="2" opacity=".9"/>`;
+avatarSvg.innerHTML = `<circle cx="30" cy="30" r="28" fill="var(--bg-alt)"/><circle cx="30" cy="26" r="10" fill="none" stroke="${accent}" stroke-width="2.5"/>${hair}<g transform="translate(15,38) scale(0.5)" style="fill:${accent}">${domainIcons[primary]}</g>`;
+}
+function spawnFormHang(){
+const layer = document.getElementById('formHang');
+if (!layer) return;
+layer.innerHTML = '';
+const domains = state.domains.length ? state.domains : ['Art'];
+const items = [];
+domains.forEach(d => {
+const media = domainMedia[d];
+if (media && media.length) media.forEach(src => items.push({ d, src }));
+else items.push({ d, src: null });
+});
+items.forEach((item, i) => {
+const h = 50 + (i % 3) * 20;
+const el = document.createElement('div');
+el.className = 'hang';
+el.style.animationDelay = (i * 0.06) + 's, ' + (0.4 + i * 0.06) + 's';
+el.innerHTML = `<span class="thread" style="height:${h}px;"></span><span class="swatch" style="background:${domainColorVar[item.d]}">${mediaEl(item.d, item.src)}</span>`;
+layer.appendChild(el);
+});
+}
+const muteBtn = document.getElementById('muteToggle');
+if (muteBtn) muteBtn.addEventListener('click', () => {
+const v = document.getElementById('outroVideo');
+if (!v) return;
+v.muted = !v.muted;
+muteBtn.textContent = v.muted ? '🔇' : '🔊';
+});
+const submitBtn = document.getElementById('submitBtn');
+if (submitBtn) submitBtn.addEventListener('click', () => {
+const applyEl = document.getElementById('apply');
+if (applyEl) applyEl.style.display = 'none';
+const outroEl = document.getElementById('outro');
+if (outroEl){
+outroEl.classList.add('active');
+outroEl.scrollIntoView({ behavior: 'smooth' });
+}
+});
+goToStep(1);
