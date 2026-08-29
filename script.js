@@ -1,3 +1,4 @@
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwAgpPRxJEE0tpmla7Zyph-TFCImQ_B5h6e6mPPdnyZmcovayimYqrfRvBeeQPmTQ1b/exec';
 function checkAsset(path, flagClass){
 return new Promise(resolve => {
 const img = new Image();
@@ -11,8 +12,12 @@ function initStarfield(){
 const canvas = document.getElementById('starfield');
 if (!canvas) return;
 const ctx = canvas.getContext('2d');
-function resize(){ canvas.width = innerWidth; canvas.height = innerHeight; }
-resize(); addEventListener('resize', resize);
+function resize(){
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+}
+resize();
+addEventListener('resize', resize);
 const stars = Array.from({ length: 55 }, () => ({
 x: Math.random() * canvas.width, y: Math.random() * canvas.height,
 r: Math.random() * 1.3 + 0.3, phase: Math.random() * Math.PI * 2, speed: 0.4 + Math.random() * 0.8
@@ -46,9 +51,15 @@ Video_Editing:'assets/video-editing.png', Digital_Art:'assets/digital-art.png'
 const domainMedia = {
 Art:['assets/a1.webp','assets/a2.webp','assets/a3.webp','assets/a4.webp','assets/a5.webp'],
 Photography:['assets/p1.webp','assets/p2.webp','assets/p3.webp','assets/p4.webp','assets/p5.webp'],
-Video_Editing:[],
+Video_Editing:['assets/fe2025.mp4','assets/club-video.mp4'],
 Digital_Art:['assets/da1.webp','assets/da2.webp','assets/da3.webp','assets/da4.webp','assets/da5.webp'],
 Other:[]
+};
+const avatarSrc = {
+Art:{Male:'assets/l__art_b.png', Female:'assets/l_art_g.png'},
+Photography:{Male:'assets/l_photo_b.png', Female:'assets/l_photo_g.png'},
+Video_Editing:{Male:'assets/l_editor_b.png', Female:'assets/l_editor_g.png'},
+Digital_Art:{Male:'assets/l_digital_b.png', Female:'assets/l_digital_g.png'}
 };
 function mediaEl(domain, src){
 if (src){
@@ -126,14 +137,64 @@ i++;
 }
 }
 }
+function launchConfetti(){
+const layer = document.getElementById('confettiLayer');
+if (!layer) return;
+const colors = ['var(--red)','var(--gold)','var(--teal)','var(--purple)','var(--blue)','var(--orange)','var(--paper)'];
+for (let i = 0; i < 90; i++){
+const el = document.createElement('span');
+el.className = 'confetti-piece';
+const size = 6 + Math.random() * 8;
+el.style.width = size + 'px';
+el.style.height = (size * 0.4) + 'px';
+el.style.left = Math.random() * 100 + '%';
+el.style.background = colors[i % colors.length];
+el.style.animationDuration = (2.2 + Math.random() * 1.6) + 's';
+el.style.animationDelay = (Math.random() * 0.6) + 's';
+el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+layer.appendChild(el);
+}
+setTimeout(() => { layer.innerHTML = ''; }, 4500);
+}
 initStarfield();
 spawnFloaters(14);
 spawnHeroHang();
+function openVideoExpand(sw){
+sw.classList.add('video-expanded');
+const backdrop = document.getElementById('videoBackdrop');
+if (backdrop) backdrop.classList.add('active');
+}
+function closeVideoExpand(sw){
+sw.classList.remove('video-expanded');
+const backdrop = document.getElementById('videoBackdrop');
+if (backdrop) backdrop.classList.remove('active');
+}
 document.addEventListener('click', e => {
+const backdrop = document.getElementById('videoBackdrop');
+if (e.target === backdrop){
+document.querySelectorAll('.swatch.video-expanded').forEach(s => closeVideoExpand(s));
+return;
+}
 const sw = e.target.closest('.swatch');
 if (!sw) return;
+if (sw.querySelector('video')){
+const wasExpanded = sw.classList.contains('video-expanded');
+document.querySelectorAll('.swatch.video-expanded').forEach(s => { if (s !== sw) closeVideoExpand(s); });
+if (wasExpanded) closeVideoExpand(sw); else openVideoExpand(sw);
+return;
+}
 document.querySelectorAll('.swatch.enlarged').forEach(s => { if (s !== sw) s.classList.remove('enlarged'); });
 sw.classList.toggle('enlarged');
+});
+const heroLogoImg = document.getElementById('heroLogoImg');
+let heroLogoAlt = false;
+if (heroLogoImg) heroLogoImg.addEventListener('click', () => {
+heroLogoImg.classList.add('spinning');
+setTimeout(() => {
+heroLogoAlt = !heroLogoAlt;
+heroLogoImg.src = heroLogoAlt ? 'assets/logo-transparent.png' : 'assets/logo-emblem.png';
+}, 300);
+setTimeout(() => heroLogoImg.classList.remove('spinning'), 620);
 });
 Promise.all([
 checkAsset('assets/brush.png', 'has-brush-asset'),
@@ -156,14 +217,13 @@ if (loaderEl) loaderEl.classList.add('loader-done');
 setTimeout(() => {
 const applyEl = document.getElementById('apply');
 if (applyEl) applyEl.scrollIntoView({ behavior: 'smooth' });
-}, 10000);
+}, 5000);
 }, 4500);
 });
 const steps = [...document.querySelectorAll('.step')];
 const stops = [...document.querySelectorAll('.stop')];
 const railFill = document.getElementById('railFill');
 const avatarToken = document.getElementById('avatarToken');
-const avatarSvg = document.getElementById('avatarSvg');
 const curtain = document.getElementById('curtain');
 let currentStep = 1;
 let state = { gender: null, domains: [] };
@@ -174,7 +234,7 @@ currentStep = n;
 if (railFill && avatarToken && steps.length > 1){
 const pct = ((n - 1) / (steps.length - 1)) * 100;
 railFill.style.width = pct + '%';
-avatarToken.style.left = `calc(${pct}% - 22px)`;
+avatarToken.style.left = `calc(${pct}% - 32px)`;
 }
 }
 function playCurtain(onMid){
@@ -216,18 +276,22 @@ pop.onerror = () => pop.remove();
 chip.appendChild(pop);
 setTimeout(() => pop.remove(), 950);
 }
+function updateOtherVisibility(){
+const el = document.getElementById('otherTextField');
+if (el) el.classList.toggle('visible', state.domains.includes('Other'));
+}
 const domainChipsEl = document.getElementById('domainChips');
 if (domainChipsEl) domainChipsEl.addEventListener('click', e => {
 const chip = e.target.closest('.chip'); if (!chip) return;
 chip.classList.toggle('selected');
-const val = chip.dataset.value;
+const val2 = chip.dataset.value;
 if (chip.classList.contains('selected')){
-state.domains.push(val);
-popDomainIcon(chip, val);
+state.domains.push(val2);
+popDomainIcon(chip, val2);
 } else {
-state.domains = state.domains.filter(d => d !== val);
+state.domains = state.domains.filter(d => d !== val2);
 }
-renderAvatar(); checkStep1();
+renderAvatar(); checkStep1(); updateOtherVisibility();
 });
 function checkStep1(){
 const btn = document.querySelector('[data-step="1"] .btn-next');
@@ -242,16 +306,27 @@ if (!wrap) return;
 wrap.innerHTML = state.domains.map(d =>
 `<span class="chip domain-chip selected readonly" style="--dc:${domainColorVar[d]}">${d.replace('_',' ')}</span>`
 ).join('');
+updateOtherVisibility();
 }
 function renderAvatar(){
-if (!state.domains.length || !avatarSvg) return;
+if (!state.domains.length || !avatarToken) return;
+if (state.gender === 'Prefer not to say'){
+avatarToken.innerHTML = `<img src="assets/logo-emblem.png" alt="" style="width:100%;height:100%;object-fit:contain" onerror="this.src='assets/logo.png'">`;
+return;
+}
 const primary = state.domains[state.domains.length - 1];
-const accent = domainColorVar[primary];
+const accent = domainColorVar[primary] || 'var(--gold)';
+const genderKey = (state.gender === 'Male' || state.gender === 'Female') ? state.gender : null;
+const src = genderKey && avatarSrc[primary] ? avatarSrc[primary][genderKey] : null;
+if (src){
+avatarToken.innerHTML = `<img src="${src}" alt="" style="width:100%;height:100%;object-fit:contain">`;
+} else {
 let hair = '';
-if (state.gender === 'Girl') hair = `<path d="M14 20 Q30 4 46 20 L46 34 Q30 24 14 34 Z" fill="${accent}" opacity=".9"/>`;
-else if (state.gender === 'Boy') hair = `<path d="M14 20 Q30 10 46 20 L46 24 Q30 16 14 24 Z" fill="${accent}" opacity=".9"/>`;
+if (state.gender === 'Female') hair = `<path d="M14 20 Q30 4 46 20 L46 34 Q30 24 14 34 Z" fill="${accent}" opacity=".9"/>`;
+else if (state.gender === 'Male') hair = `<path d="M14 20 Q30 10 46 20 L46 24 Q30 16 14 24 Z" fill="${accent}" opacity=".9"/>`;
 else hair = `<circle cx="30" cy="18" r="10" fill="none" stroke="${accent}" stroke-width="2" opacity=".9"/>`;
-avatarSvg.innerHTML = `<circle cx="30" cy="30" r="28" fill="var(--bg-alt)"/><circle cx="30" cy="26" r="10" fill="none" stroke="${accent}" stroke-width="2.5"/>${hair}<g transform="translate(15,38) scale(0.5)" style="fill:${accent}">${domainIcons[primary]}</g>`;
+avatarToken.innerHTML = `<svg viewBox="0 0 60 60" style="width:100%;height:100%"><circle cx="30" cy="30" r="28" fill="var(--bg-alt)"/><circle cx="30" cy="26" r="10" fill="none" stroke="${accent}" stroke-width="2.5"/>${hair}<g transform="translate(15,38) scale(0.5)" style="fill:${accent}">${domainIcons[primary]}</g></svg>`;
+}
 }
 function spawnFormHang(){
 const layer = document.getElementById('formHang');
@@ -280,14 +355,35 @@ if (!v) return;
 v.muted = !v.muted;
 muteBtn.textContent = v.muted ? '🔇' : '🔊';
 });
+function val(id){ const el = document.getElementById(id); return el ? el.value : ''; }
+function submitToSheet(){
+if (!SHEET_URL || SHEET_URL.indexOf('PASTE_') === 0) return;
+const payload = {
+Name: val('fName'), Gender: state.gender || '', Domains: state.domains.join(', '),
+Email: val('fEmail'), Phone: val('fPhone'), Instagram: val('fInsta'),
+Year: val('fYear'), Branch: val('fBranch'), Division: val('fdivision'), Skills: state.domains.join(', '),
+Other_text: val('otherText'), Motivation: val('fMotivation'), Portfolio: val('fPortfolio')
+};
+fetch(SHEET_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) }).catch(() => {});
+}
 const submitBtn = document.getElementById('submitBtn');
 if (submitBtn) submitBtn.addEventListener('click', () => {
+const motivationEl = document.getElementById('fMotivation');
+const motivationField = motivationEl ? motivationEl.closest('.field') : null;
+if (!motivationEl || !motivationEl.value.trim()){
+if (motivationField) motivationField.classList.add('error');
+if (motivationEl) motivationEl.focus();
+return;
+}
+if (motivationField) motivationField.classList.remove('error');
+submitToSheet();
 const applyEl = document.getElementById('apply');
 if (applyEl) applyEl.style.display = 'none';
 const outroEl = document.getElementById('outro');
 if (outroEl){
 outroEl.classList.add('active');
 outroEl.scrollIntoView({ behavior: 'smooth' });
+launchConfetti();
 }
 });
 goToStep(1);

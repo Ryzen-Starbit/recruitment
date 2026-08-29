@@ -14,6 +14,8 @@
 <div class="nebula neb2"></div>
 <div class="nebula neb3"></div>
 <div class="bg-floaters" id="bgFloaters" aria-hidden="true"></div>
+<div class="video-expanded-backdrop" id="videoBackdrop"></div>
+<div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
 <div id="loader" aria-hidden="true">
 <div class="splash-layer" id="splashLayer"></div>
 <div class="brush-layer"><img class="brush-asset" src="assets/brush.png" alt="" onerror="this.remove()"></div>
@@ -39,7 +41,9 @@
 <main id="hero">
 <div class="hang-gallery" id="heroHang" aria-hidden="true"></div>
 <section class="hero-top">
-<img src="assets/logo-emblem.png" alt="Malang" class="hero-logo" onerror="this.src='assets/logo.png';this.classList.add('fallback')">
+<div class="hero-logo-wrap">
+<img src="assets/logo-emblem.png" alt="Malang" class="hero-logo" id="heroLogoImg" onerror="this.src='assets/logo.png'">
+</div>
 <p class="hero-tagline">For the <span class="gradient-text">kalakaar</span> in you.</p>
 <p class="hero-sub">Where imagination finds its canvas, and every idea finds its form.</p>
 </section>
@@ -69,7 +73,7 @@
 <span class="stop" data-step="2">Contact</span>
 <span class="stop" data-step="3">Skills</span>
 </div>
-<div class="avatar-token" id="avatarToken"><svg id="avatarSvg" viewBox="0 0 60 60"></svg></div>
+<div class="avatar-token" id="avatarToken"></div>
 </div>
 <div id="malangForm">
 <fieldset class="step active" data-step="1">
@@ -78,7 +82,7 @@
 <span>Full name</span>
 <input type="text" name="Name" id="fName" required>
 </label>
-<span class="field-label">I am</span>
+<span class="field-label">Gender</span>
 <div class="chip-row" id="genderChips">
 <button type="button" class="chip" data-value="Male">Male</button>
 <button type="button" class="chip" data-value="Female">Female</button>
@@ -109,8 +113,17 @@
 <option>1st Year</option><option>2nd Year</option>
 </select>
 </label>
-<label class="field"><span>Branch</span><input type="text" id="fBranch" required></label>
+<label class="field">
+<span>Branch</span>
+<select id="fBranch" required>
+<option value="">Select</option>
+<option>CSE</option><option>CE</option><option>CSBS</option><option>ECE</option>
+<option>EnTC</option><option>R&A</option><option>Mechanical</option><option>Civil</option>
+<option>Electrical</option><option>Chemical</option>
+</select>
+</label>
 </div>
+<label class="field"><span>Division</span><input type="text" id="fdivision"></label>
 <div class="step-nav">
 <button type="button" class="btn-back" data-back>← Back</button>
 <button type="button" class="btn-next" data-next>Continue →</button>
@@ -120,8 +133,8 @@
 <p class="eyebrow">STEP 3 — YOUR SKILLS</p>
 <span class="field-label">Your selected skills</span>
 <div class="chip-row wrap" id="skillsSummary"></div>
-<label class="field"><span>Other skills (not listed above)</span><input type="text" id="otherText"></label>
-<label class="field"><span>Why do you want to join Malang?</span><textarea id="fMotivation" rows="4" required></textarea></label>
+<label class="field" id="otherTextField"><span>Please specify your "Other" skill</span><input type="text" id="otherText"></label>
+<label class="field"><span>Why do you want to join Malang?</span><textarea id="fMotivation" rows="4"></textarea><span class="field-error" id="motivationError">Please tell us why you'd like to join.</span></label>
 <label class="field"><span>Portfolio link (optional)</span><input type="url" id="fPortfolio" placeholder="Drive Link or Instagram Handle..."></label>
 <div class="step-nav">
 <button type="button" class="btn-back" data-back>← Back</button>
@@ -133,6 +146,7 @@
 </section>
 <section id="outro">
 <h2 class="outro-thanks">Thank you for applying!</h2>
+<div class="outro-media" id="outroMedia">
 <a href="https://malangbvp.in" target="_blank" class="outro-link">To view more of our events, artworks & photographs visit our website→</a>
 <div class="outro-video-wrap">
 <video id="outroVideo" autoplay loop muted playsinline>
@@ -141,6 +155,7 @@
 <button type="button" id="muteToggle" class="mute-toggle">🔇</button>
 </div>
 <a href="https://chat.whatsapp.com/REPLACE_WITH_YOUR_LINK" target="_blank" class="outro-link whatsapp">Join our WhatsApp group →</a>
+</div>
 </section>
 <script src="script.js"></script>
 </body>
