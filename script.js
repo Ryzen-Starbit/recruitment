@@ -4,7 +4,7 @@ var s=String.fromCharCode.apply(null,c);
 console.log('%c %c '+s+' %c ','font-size:24px;','background:linear-gradient(90deg,#ff6b5b,#f3c14b,#2de0ca);color:#07050f;font-size:26px;font-weight:900;padding:14px 26px;border-radius:8px;letter-spacing:6px;text-shadow:0 2px 0 rgba(255,255,255,.35);','font-size:24px;');
 console.log('%cMalang — Fine Arts & Photography Club','color:#f3c14b;font-size:14px;font-weight:700;font-family:monospace;');
 })();
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwAgpPRxJEE0tpmla7Zyph-TFCImQ_B5h6e6mPPdnyZmcovayimYqrfRvBeeQPmTQ1b/exec';
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzh2QFcA0o58atwU8Uip5ZKDztzTogrZ6oSMbSKAHnPhiOVTf4FrJHK6SJXjQdOrvnR/exec';
 function checkAsset(path, flagClass){
 return new Promise(resolve => {
 const img = new Image();
