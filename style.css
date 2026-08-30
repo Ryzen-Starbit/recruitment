@@ -158,3 +158,22 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-of
 @media (prefers-reduced-motion: reduce){
 .marquee-track,.hang,.curtain-panel,.confetti-piece{animation:none !important;}
 }
+@media (min-width: 900px){
+.form-wrap{max-width:720px;}
+.hero-logo{width:260px;}
+.hero-tagline{font-size:3.2rem;}
+.hero-sub{font-size:1.15rem;max-width:560px;}
+.eyebrow{font-size:.85rem;}
+.field span{font-size:1.05rem;}
+.field-label{font-size:1.05rem;}
+input,select,textarea{font-size:1.1rem;padding:16px 18px;}
+.chip{font-size:1rem;padding:12px 22px;}
+.chip-row{gap:14px;}
+.btn-next,.btn-submit,.btn-back{font-size:.95rem;padding:16px 30px;}
+.stop{font-size:.85rem;}
+.avatar-token{width:80px;height:80px;top:-24px;}
+.swatch{width:64px;height:64px;}
+.corner-logo{width:100px;height:100px;}
+.outro-thanks{font-size:3.5rem;}
+.outro-link{font-size:1rem;}
+}
