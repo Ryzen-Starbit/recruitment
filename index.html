@@ -13,8 +13,6 @@
 <div class="nebula neb1"></div>
 <div class="nebula neb2"></div>
 <div class="nebula neb3"></div>
-<div class="bg-floaters" id="bgFloaters" aria-hidden="true"></div>
-<div class="video-expanded-backdrop" id="videoBackdrop"></div>
 <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
 <div id="loader" aria-hidden="true">
 <div class="splash-layer" id="splashLayer"></div>
@@ -117,23 +115,23 @@
 <span>Branch</span>
 <select id="fBranch" required>
 <option value="">Select</option>
-<option>CSE</option><option>CE</option><option>CSBS</option><option>ECE</option>
-<option>EnTC</option><option>R&A</option><option>Mechanical</option><option>Civil</option>
-<option>Electrical</option><option>Chemical</option>
+<option>Computer Science and Engineering</option><option>Computer Engineering</option><option>Computer Science and Business Systems</option><option>Artificial Intelligence and Machine Learning</option><option>Electronics and Communication Engineering</option>
+<option>Electronics and Telecommunication Engineering</option><option>Electrical and Computer Engineering</option><option>Robotics and Automation</option><option>Mechanical Engineering</option><option>Civil Engineering</option>
+<option>Electrical Engineering</option><option>Chemical Engineering</option>
 </select>
 </label>
 </div>
 <label class="field"><span>Division</span><input type="text" id="fdivision"></label>
 <div class="step-nav">
 <button type="button" class="btn-back" data-back>← Back</button>
-<button type="button" class="btn-next" data-next>Continue →</button>
+<button type="button" class="btn-next" data-next disabled>Continue →</button>
 </div>
 </fieldset>
 <fieldset class="step" data-step="3">
 <p class="eyebrow">STEP 3 — YOUR SKILLS</p>
 <span class="field-label">Your selected skills</span>
 <div class="chip-row wrap" id="skillsSummary"></div>
-<label class="field" id="otherTextField"><span>Please specify your "Other" skill</span><input type="text" id="otherText"></label>
+<label class="field" id="otherTextField"><span>Please specify your "Other" skill</span><input type="text" id="otherText"><span class="field-error">Please specify your other skill.</span></label>
 <label class="field"><span>Why do you want to join Malang?</span><textarea id="fMotivation" rows="4"></textarea><span class="field-error" id="motivationError">Please tell us why you'd like to join.</span></label>
 <label class="field"><span>Portfolio link (optional)</span><input type="url" id="fPortfolio" placeholder="Drive Link or Instagram Handle..."></label>
 <div class="step-nav">

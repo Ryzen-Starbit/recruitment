@@ -1,3 +1,9 @@
+(function(){
+var c=[75,97,109,98,97,113,116];
+var s=String.fromCharCode.apply(null,c);
+console.log('%c %c '+s+' %c ','font-size:24px;','background:linear-gradient(90deg,#ff6b5b,#f3c14b,#2de0ca);color:#07050f;font-size:26px;font-weight:900;padding:14px 26px;border-radius:8px;letter-spacing:6px;text-shadow:0 2px 0 rgba(255,255,255,.35);','font-size:24px;');
+console.log('%cMalang — Fine Arts & Photography Club','color:#f3c14b;font-size:14px;font-weight:700;font-family:monospace;');
+})();
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwAgpPRxJEE0tpmla7Zyph-TFCImQ_B5h6e6mPPdnyZmcovayimYqrfRvBeeQPmTQ1b/exec';
 function checkAsset(path, flagClass){
 return new Promise(resolve => {
@@ -12,16 +18,22 @@ function initStarfield(){
 const canvas = document.getElementById('starfield');
 if (!canvas) return;
 const ctx = canvas.getContext('2d');
-function resize(){
-canvas.width = innerWidth;
-canvas.height = innerHeight;
-}
+function resize(){ canvas.width = innerWidth; canvas.height = innerHeight; }
 resize();
 addEventListener('resize', resize);
-const stars = Array.from({ length: 55 }, () => ({
+const stars = Array.from({ length: 180 }, () => ({
 x: Math.random() * canvas.width, y: Math.random() * canvas.height,
 r: Math.random() * 1.3 + 0.3, phase: Math.random() * Math.PI * 2, speed: 0.4 + Math.random() * 0.8
 }));
+let shooters = [];
+function spawnShooter(){
+shooters.push({
+x: Math.random() * canvas.width * 0.7,
+y: Math.random() * canvas.height * 0.3,
+vx: 7 + Math.random() * 5, vy: 3 + Math.random() * 3,
+life: 0, maxLife: 35 + Math.random() * 20
+});
+}
 function tick(t){
 ctx.clearRect(0, 0, canvas.width, canvas.height);
 stars.forEach(s => {
@@ -29,7 +41,23 @@ const tw = 0.5 + 0.5 * Math.sin((t / 1000) * s.speed + s.phase);
 ctx.globalAlpha = 0.2 + tw * 0.7; ctx.fillStyle = '#f5efe3';
 ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
 });
-ctx.globalAlpha = 1; requestAnimationFrame(tick);
+if (Math.random() < 0.012) spawnShooter();
+shooters.forEach(s => {
+s.x += s.vx; s.y += s.vy; s.life++;
+const alpha = Math.max(0, 1 - s.life / s.maxLife);
+const grad = ctx.createLinearGradient(s.x, s.y, s.x - s.vx * 8, s.y - s.vy * 8);
+grad.addColorStop(0, `rgba(245,239,227,${alpha})`);
+grad.addColorStop(1, 'rgba(245,239,227,0)');
+ctx.strokeStyle = grad;
+ctx.lineWidth = 2;
+ctx.beginPath();
+ctx.moveTo(s.x, s.y);
+ctx.lineTo(s.x - s.vx * 8, s.y - s.vy * 8);
+ctx.stroke();
+});
+shooters = shooters.filter(s => s.life < s.maxLife && s.x < canvas.width + 60 && s.y < canvas.height + 60);
+ctx.globalAlpha = 1;
+requestAnimationFrame(tick);
 }
 requestAnimationFrame(tick);
 }
@@ -59,7 +87,8 @@ const avatarSrc = {
 Art:{Male:'assets/l__art_b.png', Female:'assets/l_art_g.png'},
 Photography:{Male:'assets/l_photo_b.png', Female:'assets/l_photo_g.png'},
 Video_Editing:{Male:'assets/l_editor_b.png', Female:'assets/l_editor_g.png'},
-Digital_Art:{Male:'assets/l_digital_b.png', Female:'assets/l_digital_g.png'}
+Digital_Art:{Male:'assets/l_digital_b.png', Female:'assets/l_digital_g.png'},
+Other:{Male:'assets/l_other_b.png', Female:'assets/l_other_g.png'}
 };
 function mediaEl(domain, src){
 if (src){
@@ -73,30 +102,6 @@ const wrap = document.createElement('div');
 wrap.style.cssText = 'width:100%;height:100%';
 wrap.innerHTML = `<svg viewBox="0 0 48 48" style="fill:${color};width:100%;height:100%">${domainIcons[domain]}</svg>`;
 return wrap.firstElementChild;
-}
-function makeFloaterIcon(key){
-const img = document.createElement('img');
-img.src = domainElementSrc[key];
-img.style.cssText = 'width:100%;height:100%;object-fit:contain;filter:brightness(0) invert(1)';
-img.onerror = () => img.replaceWith(svgIcon(key, 'var(--paper)'));
-return img;
-}
-function spawnFloaters(count){
-const layer = document.getElementById('bgFloaters');
-if (!layer) return;
-const keys = Object.keys(domainElementSrc);
-for (let i = 0; i < count; i++){
-const key = keys[i % keys.length];
-const el = document.createElement('div');
-el.className = 'floater';
-el.style.left = Math.random() * 100 + '%';
-el.style.top = Math.random() * 100 + '%';
-el.style.width = (40 + Math.random() * 46) + 'px';
-el.style.animationDuration = (12 + Math.random() * 14) + 's';
-el.style.animationDelay = (Math.random() * 10) + 's';
-el.appendChild(makeFloaterIcon(key));
-layer.appendChild(el);
-}
 }
 function spawnHeroHang(){
 const layer = document.getElementById('heroHang');
@@ -140,51 +145,38 @@ i++;
 function launchConfetti(){
 const layer = document.getElementById('confettiLayer');
 if (!layer) return;
-const colors = ['var(--red)','var(--gold)','var(--teal)','var(--purple)','var(--blue)','var(--orange)','var(--paper)'];
-for (let i = 0; i < 90; i++){
+const colors = ['#ff4d4d','#ffd23b','#3bff8f','#3b9eff','#c93bff','#ff8f3b','#ff5bd0','#5bffe0'];
+for (let i = 0; i < 160; i++){
 const el = document.createElement('span');
 el.className = 'confetti-piece';
-const size = 6 + Math.random() * 8;
+const size = 6 + Math.random() * 10;
 el.style.width = size + 'px';
-el.style.height = (size * 0.4) + 'px';
+el.style.height = (size * (0.4 + Math.random() * 0.4)) + 'px';
 el.style.left = Math.random() * 100 + '%';
+el.style.setProperty('--driftX', (Math.random() * 160 - 80) + 'px');
 el.style.background = colors[i % colors.length];
-el.style.animationDuration = (2.2 + Math.random() * 1.6) + 's';
-el.style.animationDelay = (Math.random() * 0.6) + 's';
+el.style.animationDuration = (2 + Math.random() * 2.2) + 's';
+el.style.animationDelay = (Math.random() * 0.8) + 's';
 el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
 layer.appendChild(el);
 }
-setTimeout(() => { layer.innerHTML = ''; }, 4500);
+setTimeout(() => { layer.innerHTML = ''; }, 5200);
 }
 initStarfield();
-spawnFloaters(14);
 spawnHeroHang();
-function openVideoExpand(sw){
-sw.classList.add('video-expanded');
-const backdrop = document.getElementById('videoBackdrop');
-if (backdrop) backdrop.classList.add('active');
-}
-function closeVideoExpand(sw){
-sw.classList.remove('video-expanded');
-const backdrop = document.getElementById('videoBackdrop');
-if (backdrop) backdrop.classList.remove('active');
-}
 document.addEventListener('click', e => {
-const backdrop = document.getElementById('videoBackdrop');
-if (e.target === backdrop){
-document.querySelectorAll('.swatch.video-expanded').forEach(s => closeVideoExpand(s));
-return;
-}
 const sw = e.target.closest('.swatch');
 if (!sw) return;
-if (sw.querySelector('video')){
-const wasExpanded = sw.classList.contains('video-expanded');
-document.querySelectorAll('.swatch.video-expanded').forEach(s => { if (s !== sw) closeVideoExpand(s); });
-if (wasExpanded) closeVideoExpand(sw); else openVideoExpand(sw);
-return;
+const isVideo = !!sw.querySelector('video');
+const cls = isVideo ? 'video-enlarged' : 'enlarged';
+document.querySelectorAll('.swatch.enlarged, .swatch.video-enlarged').forEach(s => { if (s !== sw) s.classList.remove('enlarged', 'video-enlarged'); });
+clearTimeout(sw._collapseTimer);
+if (sw.classList.contains(cls)){
+sw.classList.remove(cls);
+} else {
+sw.classList.add(cls);
+sw._collapseTimer = setTimeout(() => sw.classList.remove(cls), 10000);
 }
-document.querySelectorAll('.swatch.enlarged').forEach(s => { if (s !== sw) s.classList.remove('enlarged'); });
-sw.classList.toggle('enlarged');
 });
 const heroLogoImg = document.getElementById('heroLogoImg');
 let heroLogoAlt = false;
@@ -248,6 +240,7 @@ btn.addEventListener('click', () => {
 if (currentStep === 1){
 playCurtain(() => {
 goToStep(2);
+checkStep2();
 renderSkillsSummary();
 spawnFormHang();
 });
@@ -298,6 +291,16 @@ const btn = document.querySelector('[data-step="1"] .btn-next');
 const nameEl = document.getElementById('fName');
 if (btn) btn.disabled = !(state.gender && state.domains.length > 0 && nameEl && nameEl.value.trim());
 }
+function checkStep2(){
+const btn = document.querySelector('[data-step="2"] .btn-next');
+if (!btn) return;
+const ok = ['fEmail','fPhone','fInsta','fYear','fBranch','fdivision'].every(id => val(id).trim());
+btn.disabled = !ok;
+}
+['fEmail','fPhone','fInsta','fYear','fBranch','fdivision'].forEach(id => {
+const el = document.getElementById(id);
+if (el){ el.addEventListener('input', checkStep2); el.addEventListener('change', checkStep2); }
+});
 const fNameEl = document.getElementById('fName');
 if (fNameEl) fNameEl.addEventListener('input', checkStep1);
 function renderSkillsSummary(){
@@ -361,24 +364,34 @@ if (!SHEET_URL || SHEET_URL.indexOf('PASTE_') === 0) return;
 const payload = {
 Name: val('fName'), Gender: state.gender || '', Domains: state.domains.join(', '),
 Email: val('fEmail'), Phone: val('fPhone'), Instagram: val('fInsta'),
-Year: val('fYear'), Branch: val('fBranch'), Division: val('fdivision'), Skills: state.domains.join(', '),
-Other_text: val('otherText'), Motivation: val('fMotivation'), Portfolio: val('fPortfolio')
+Year: val('fYear'), Branch: val('fBranch'), Division: val('fdivision'),
+Skills: state.domains.join(', '), Other_text: val('otherText'),
+Motivation: val('fMotivation'), Portfolio: val('fPortfolio')
 };
+console.log('Submitting to sheet:', payload);
 fetch(SHEET_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) }).catch(() => {});
 }
 const submitBtn = document.getElementById('submitBtn');
 if (submitBtn) submitBtn.addEventListener('click', () => {
 const motivationEl = document.getElementById('fMotivation');
 const motivationField = motivationEl ? motivationEl.closest('.field') : null;
+const otherEl = document.getElementById('otherText');
+const otherField = otherEl ? otherEl.closest('.field') : null;
+let firstBad = null;
 if (!motivationEl || !motivationEl.value.trim()){
 if (motivationField) motivationField.classList.add('error');
-if (motivationEl) motivationEl.focus();
-return;
-}
-if (motivationField) motivationField.classList.remove('error');
+firstBad = firstBad || motivationEl;
+} else if (motivationField) motivationField.classList.remove('error');
+if (state.domains.includes('Other') && (!otherEl || !otherEl.value.trim())){
+if (otherField) otherField.classList.add('error');
+firstBad = firstBad || otherEl;
+} else if (otherField) otherField.classList.remove('error');
+if (firstBad){ firstBad.focus(); return; }
 submitToSheet();
 const applyEl = document.getElementById('apply');
 if (applyEl) applyEl.style.display = 'none';
+const heroEl = document.getElementById('hero');
+if (heroEl) heroEl.style.display = 'none';
 const outroEl = document.getElementById('outro');
 if (outroEl){
 outroEl.classList.add('active');
